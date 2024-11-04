@@ -1,0 +1,63 @@
+import tkinter as tk
+from tkinter import ttk, messagebox
+from forex_python.converter import CurrencyRates
+
+class ConversorMoedaApp:
+    def _init_(self, master):
+        self.master = master
+        self.master.title("Conversor de Moedas")
+
+        self.c = CurrencyRates()
+
+        # Labels
+        self.label_valor = tk.Label(master, text="Valor:")
+        self.label_valor.grid(row=0, column=0, padx=10, pady=10)
+
+        self.label_moeda_origem = tk.Label(master, text="Moeda de Origem:")
+        self.label_moeda_origem.grid(row=1, column=0, padx=10, pady=10)
+
+        self.label_moeda_destino = tk.Label(master, text="Moeda de Destino:")
+        self.label_moeda_destino.grid(row=2, column=0, padx=10, pady=10)
+
+        self.label_resultado = tk.Label(master, text="Resultado:")
+        self.label_resultado.grid(row=4, column=0, padx=10, pady=10)
+
+        # Entradas
+        self.entry_valor = tk.Entry(master)
+        self.entry_valor.grid(row=0, column=1, padx=10, pady=10)
+
+        self.combo_moeda_origem = ttk.Combobox(master, values=self.c.get_currency_names())
+        self.combo_moeda_origem.grid(row=1, column=1, padx=10, pady=10)
+
+        self.combo_moeda_destino = ttk.Combobox(master, values=self.c.get_currency_names())
+        self.combo_moeda_destino.grid(row=2, column=1, padx=10, pady=10)
+
+        # Botão de Conversão
+        self.button_converter = tk.Button(master, text="Converter", command=self.converter)
+        self.button_converter.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+
+        # Campo de resultado
+        self.resultado_var = tk.StringVar()
+        self.entry_resultado = tk.Entry(master, textvariable=self.resultado_var, state='readonly')
+        self.entry_resultado.grid(row=4, column=1, padx=10, pady=10)
+
+    def converter(self):
+        try:
+            valor = float(self.entry_valor.get())
+            moeda_origem = self.combo_moeda_origem.get()
+            moeda_destino = self.combo_moeda_destino.get()
+
+            if not moeda_origem or not moeda_destino:
+                raise ValueError("Selecione ambas as moedas.")
+
+            valor_convertido = self.c.convert(moeda_origem, moeda_destino, valor)
+            self.resultado_var.set(f"{valor_convertido:.2f} {moeda_destino}")
+        except ValueError as ve:
+            messagebox.showerror("Erro", str(ve))
+        except Exception as e:
+            messagebox.showerror("Erro", f"Não foi possível converter: {e}")
+
+if _name_ == "_main_":
+    root = tk.Tk()
+    app = ConversorMoedaApp(root)
+    root.mainloop()
